@@ -259,11 +259,15 @@ def data_visualisation(training_data, validation_data, results):
 	# calculate recall
 	recall = correct_total / (correct_total + results.setosa_matrix.fn + results.versicolor_matrix.fn + results.virginica_matrix.fn)
 	
+	# calculate f-score
+	f_score = 2 * (precision*recall)/(precision+recall)
+	
 	# report addidtional info on plot
 	plt.gcf().text(0.15, 0.05, "Assumed k = " + str(num_neighbors), fontsize=12)
 	plt.gcf().text(0.15, 0.01, f"Recall: {recall :.2%}", fontsize=12)
 	plt.gcf().text(0.3, 0.05, f"Accuracy: {accuracy :.2%}", fontsize=12)
 	plt.gcf().text(0.3, 0.01, f"Precision: {precision :.2%}", fontsize=12)
+	plt.gcf().text(0.225, 0.09, f"f-score: {f_score :.2%}", fontsize=12)
 
 	return accuracy
 
