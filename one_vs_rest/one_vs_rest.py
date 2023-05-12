@@ -90,14 +90,12 @@ def perceptron(train, test, learning_rate, n_epoch):
 	return(predictions)
 
 # run perceptron and report results
-def run_algorithm(train_set, test_set, learning_rate, n_epoch):
+def run_algorithm(train_set, test_set, learning_rate, n_epoch, plot_nr, flower_name):
 	predicted = perceptron(train_set, test_set, learning_rate, n_epoch)
 	target_outputs = [row[-1] for row in test_set]
-	accuracy = accuracy_metric(target_outputs, predicted)
-	generate_confusion_matrix(test_set, learning_rate, n_epoch, predicted)
-	return accuracy
+	generate_confusion_matrix(test_set, learning_rate, n_epoch, predicted, plot_nr, flower_name)
 
-def generate_confusion_matrix(test_dataset, learning_rate, n_epoch, predictions):
+def generate_confusion_matrix(test_dataset, learning_rate, n_epoch, predictions, plot_nr, flower_name):
 	matrix=list()
 	matrix=[[0 for i in range(2)] for j in range(2)]
 	i = 0
@@ -112,11 +110,16 @@ def generate_confusion_matrix(test_dataset, learning_rate, n_epoch, predictions)
 		elif row[-1]!=0 and predictions[i]!=0.0:
 			matrix[1][1]+=1 #tn
 		i = i + 1
-	
+
+	tp = matrix[0][0]
+	fp = matrix[0][1]
+	fn = matrix[1][0]
+	tn = matrix[1][1]
+
 	# data vislualisation
-	axs[0].set_axis_off() 
-	axs[0].set_title('confusion matrix for setosa flowers', fontweight ="bold")
-	table = axs[0].table( 
+	axs[plot_nr].set_axis_off() 
+	axs[plot_nr].set_title("confusion matrix\n" + flower_name + " flowers", fontweight ="bold")
+	table = axs[plot_nr].table( 
     	cellText = [[str(matrix[0][0]),str(matrix[1][1])], [str(matrix[0][1]),str(matrix[1][0])]],  
     	rowLabels = ['true', 'false'],  
     	colLabels = ['positive', 'negative'] , 
@@ -124,18 +127,23 @@ def generate_confusion_matrix(test_dataset, learning_rate, n_epoch, predictions)
     	rowColours =["lightblue"] * 2,  
     	colColours =["lightblue"] * 2, 
     	cellLoc ='center',  
-    	loc ='center')   
+    	loc ='center') 
+
+	# effectivness metrics
+	accuracy = (tp+tn)/(tp+tn+fp+fn) * 100
+	plt.gcf().text((0.15 + plot_nr * 0.275), 0.35, 'Accuracy rate: %.2f%%' % accuracy, fontsize=12) 
 
 def prepare_subdataset(source_dataset, class_name, p):
-    for row in source_dataset:
-        if row[-1] == class_name:
-            row[-1] = 1
-        else:
-            row[-1] = 0
-    output = list()
-    for row in range(round(len(source_dataset)*p)):
-        output.append(source_dataset[row])
-    return output	
+	target_dataset = copy.deepcopy(source_dataset)
+	for row in target_dataset:
+		if row[-1] == class_name:
+			row[-1] = 1
+		else:
+			row[-1] = 0
+	output = list()
+	for row in range(round(len(target_dataset)*p)):
+		output.append(target_dataset[row])
+	return output	
 
 ###########################
 # TESTING
@@ -150,22 +158,22 @@ for i in range(len(dataset[0])-1):
 random.shuffle(dataset)
 
 dataset_setosa_training = prepare_subdataset(dataset, "Iris-setosa", 0.8)
-#dataset_versicolor_training = prepare_subdataset(dataset, "Iris-versicolor", 0.8)
-#dataset_virginica_training = prepare_subdataset(dataset, "Iris-virginica", 0.8)
+dataset_versicolor_training = prepare_subdataset(dataset, "Iris-versicolor", 0.8)
+dataset_virginica_training = prepare_subdataset(dataset, "Iris-virginica", 0.8)
 
 dataset_setosa_validation = prepare_subdataset(dataset, "Iris-setosa", 0.2)
-#dataset_versicolor_validation = prepare_subdataset(dataset, "Iris-versicolor", 0.2)
-#dataset_virginica_validation = prepare_subdataset(dataset, "Iris-virginica", 0.2)
+dataset_versicolor_validation = prepare_subdataset(dataset, "Iris-versicolor", 0.2)
+dataset_virginica_validation = prepare_subdataset(dataset, "Iris-virginica", 0.2)
 
 # initial parameters
 learning_rate = 0.01
 n_epoch = 10
 
 # prepare plot
-fig, axs = plt.subplots(nrows = 1, ncols = 2,figsize=(12,4))
+fig, axs = plt.subplots(nrows = 1, ncols = 3,figsize=(12,4))
 
+run_algorithm(dataset_setosa_training, dataset_setosa_validation, learning_rate, n_epoch, 0, "setosa")
+run_algorithm(dataset_versicolor_training, dataset_versicolor_validation, learning_rate, n_epoch, 1, "virginica")
+run_algorithm(dataset_virginica_training, dataset_virginica_validation, learning_rate, n_epoch, 2, "versicolor")
 
-score = run_algorithm(dataset_setosa_training, dataset_setosa_validation, learning_rate, n_epoch)
-
-plt.gcf().text(0.2, 0.35, 'Accuracy rate: %.3f%%' % score, fontsize=12)
 plt.show()
