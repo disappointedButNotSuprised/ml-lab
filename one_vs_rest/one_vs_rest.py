@@ -17,45 +17,10 @@ def load_csv(filename):
 			dataset.append(row)
 	return dataset
 
-# divide data into trainig and testing subsets
-def divide_data(dataset):
-	training_dataset = list()
-	testing_dataset = list()
-	# assign records of the dataset to each subset accoring to randomized order
-	random.seed(69) # randomize in the same way every run
-	RNG_list = random.sample(range(len(dataset)), len(dataset))
-	for record in range(len(dataset)):
-		if(record < 0.6*len(dataset)):
-			training_dataset.append(dataset[RNG_list[record]])
-		else:
-			testing_dataset.append(dataset[RNG_list[record]])
-	# return dataset as list of sublists
-	full_dataset = [training_dataset, testing_dataset]
-	return full_dataset
-
 # Convert string column to float
 def str_column_to_float(dataset, column):
 	for row in dataset:
 		row[column] = float(row[column].strip())
-
-# Convert string column to integer
-def str_column_to_int(dataset, column):
-	class_values = [row[column] for row in dataset]
-	unique = set(class_values)
-	lookup = dict()
-	for i, value in enumerate(unique):
-		lookup[value] = i
-	for row in dataset:
-		row[column] = lookup[row[column]]
-	return lookup
-
-# Calculate accuracy percentage
-def accuracy_metric(actual, predicted):
-	correct = 0
-	for i in range(len(actual)):
-		if actual[i] == predicted[i]:
-			correct += 1
-	return correct / float(len(actual)) * 100.0
 
 # make a prediction according to provided weights
 def predict(row, weights):
@@ -92,23 +57,25 @@ def perceptron(train, test, learning_rate, n_epoch):
 # run perceptron and report results
 def run_algorithm(train_set, test_set, learning_rate, n_epoch, plot_nr, flower_name):
 	predicted = perceptron(train_set, test_set, learning_rate, n_epoch)
-	target_outputs = [row[-1] for row in test_set]
-	generate_confusion_matrix(test_set, learning_rate, n_epoch, predicted, plot_nr, flower_name)
+	data_visualisation(test_set, learning_rate, n_epoch, predicted, plot_nr, flower_name)
 
-def generate_confusion_matrix(test_dataset, learning_rate, n_epoch, predictions, plot_nr, flower_name):
+# data visulaisation and performance metrics
+def data_visualisation(test_dataset, learning_rate, n_epoch, predictions, plot_nr, flower_name):
+	
+	# confusion matrix
 	matrix=list()
 	matrix=[[0 for i in range(2)] for j in range(2)]
 	i = 0
 	for row in test_dataset:
         #constructing the actual matrix
-		if row[-1]==0 and predictions[i]==0.0:
-			matrix[0][0]+=1 #tp
-		elif row[-1]!=0 and predictions[i]==0.0:
-			matrix[0][1]+=1 #fp
-		elif row[-1]==0 and predictions[i]!=0.0:
-			matrix[1][0]+=1 #fn
-		elif row[-1]!=0 and predictions[i]!=0.0:
-			matrix[1][1]+=1 #tn
+		if row[-1] == 0 and predictions[i] == 0.0:
+			matrix[0][0] += 1 #tp
+		elif row[-1] != 0 and predictions[i] == 0.0:
+			matrix[0][1] += 1 #fp
+		elif row[-1] == 0 and predictions[i] != 0.0:
+			matrix[1][0] += 1 #fn
+		elif row[-1] != 0 and predictions[i] != 0.0:
+			matrix[1][1] += 1 #tn
 		i = i + 1
 
 	tp = matrix[0][0]
@@ -116,10 +83,10 @@ def generate_confusion_matrix(test_dataset, learning_rate, n_epoch, predictions,
 	fn = matrix[1][0]
 	tn = matrix[1][1]
 
-	# data vislualisation
-	axs[plot_nr].set_axis_off() 
-	axs[plot_nr].set_title("confusion matrix\n" + flower_name + " flowers", fontweight ="bold")
-	table = axs[plot_nr].table( 
+	# confusion matrix table print
+	axs[0, plot_nr].set_axis_off() 
+	axs[0, plot_nr].set_title("performance metrics for\n" + flower_name + " flowers", fontweight ="bold")
+	conf_matrix = axs[0, plot_nr].table( 
     	cellText = [[str(matrix[0][0]),str(matrix[1][1])], [str(matrix[0][1]),str(matrix[1][0])]],  
     	rowLabels = ['true', 'false'],  
     	colLabels = ['positive', 'negative'] , 
@@ -128,11 +95,38 @@ def generate_confusion_matrix(test_dataset, learning_rate, n_epoch, predictions,
     	colColours =["lightblue"] * 2, 
     	cellLoc ='center',  
     	loc ='center') 
+	conf_matrix.scale(1,1.5) 
 
-	# effectivness metrics
+	# performance metrics
 	accuracy = (tp+tn)/(tp+tn+fp+fn) * 100
-	plt.gcf().text((0.15 + plot_nr * 0.275), 0.35, 'Accuracy rate: %.2f%%' % accuracy, fontsize=12) 
+	precision = tp/(tp+fp) * 100
+	recall = tp/(tp+fn) * 100
+	specificity = tn/(fp+tn) * 100
+	f_score = 2*(precision*recall)/(precision+recall)/100
 
+	metrics = [	[str(round(accuracy,2)) + " %"],
+				[str(round(precision,2)) + " %"],
+				[str(round(recall,2)) + " %"],
+				[str(round(specificity,2)) + " %"],
+				[str(round(f_score,1))]]
+
+	# performance metrics table print
+	axs[1, plot_nr].set_axis_off() 
+	perf_metrics = axs[1, plot_nr].table( 
+    	cellText = metrics,  
+    	rowLabels = ['accuracy', 'precision', 'recall', 'specificity', 'f-score'],   
+		colWidths = [0.4],
+    	rowColours =["lightblue"] * 5,   
+    	cellLoc ='center',  
+    	loc ='center') 
+	perf_metrics.scale(1,1.5)
+
+	# center the metrics table to the confusion matrix
+	box = axs[1, plot_nr].get_position()
+	box.x0 = box.x0 + 0.05
+	axs[1, plot_nr].set_position(box)
+
+# for preparing training and validation datasets in a one vs rest fashion
 def prepare_subdataset(source_dataset, class_name, p):
 	target_dataset = copy.deepcopy(source_dataset)
 	for row in target_dataset:
@@ -170,7 +164,7 @@ learning_rate = 0.01
 n_epoch = 10
 
 # prepare plot
-fig, axs = plt.subplots(nrows = 1, ncols = 3,figsize=(12,4))
+fig, (axs) = plt.subplots(nrows = 2, ncols = 3,figsize=(12,4))
 
 run_algorithm(dataset_setosa_training, dataset_setosa_validation, learning_rate, n_epoch, 0, "setosa")
 run_algorithm(dataset_versicolor_training, dataset_versicolor_validation, learning_rate, n_epoch, 1, "virginica")
