@@ -127,7 +127,8 @@ def generate_confusion_matrix(test_dataset, learning_rate, n_epoch, predictions)
     	rowColours =["lightblue"] * 2,  
     	colColours =["lightblue"] * 2, 
     	cellLoc ='center',  
-    	loc ='center')   
+    	loc ='center')
+	table.scale(1,1.5) 
 
 
 ###########################
