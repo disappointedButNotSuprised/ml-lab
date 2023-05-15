@@ -126,18 +126,21 @@ def data_visualisation(test_dataset, learning_rate, n_epoch, predictions, plot_n
 	box.x0 = box.x0 + 0.05
 	axs[1, plot_nr].set_position(box)
 
-# for preparing training and validation datasets in a one vs rest fashion
-def prepare_subdataset(source_dataset, class_name, p):
+# preparing training and validation datasets in a one-vs-rest fashion
+def prepare_subdataset(source_dataset, class_name, p, reversed = False):
 	target_dataset = copy.deepcopy(source_dataset)
 	for row in target_dataset:
 		if row[-1] == class_name:
 			row[-1] = 1
 		else:
 			row[-1] = 0
-	output = list()
-	for row in range(round(len(target_dataset)*p)):
-		output.append(target_dataset[row])
-	return output	
+	output_dataset = list()
+	dataset_range = range(round(len(target_dataset)*p))
+	if (reversed == True):
+		dataset_range = range(round(len(target_dataset)*p),0,-1)
+	for row in dataset_range:
+		output_dataset.append(target_dataset[row])
+	return output_dataset
 
 ###########################
 # TESTING
@@ -155,9 +158,9 @@ dataset_setosa_training = prepare_subdataset(dataset, "Iris-setosa", 0.8)
 dataset_versicolor_training = prepare_subdataset(dataset, "Iris-versicolor", 0.8)
 dataset_virginica_training = prepare_subdataset(dataset, "Iris-virginica", 0.8)
 
-dataset_setosa_validation = prepare_subdataset(dataset, "Iris-setosa", 0.2)
-dataset_versicolor_validation = prepare_subdataset(dataset, "Iris-versicolor", 0.2)
-dataset_virginica_validation = prepare_subdataset(dataset, "Iris-virginica", 0.2)
+dataset_setosa_validation = prepare_subdataset(dataset, "Iris-setosa", 0.2, True)
+dataset_versicolor_validation = prepare_subdataset(dataset, "Iris-versicolor", 0.2, True)
+dataset_virginica_validation = prepare_subdataset(dataset, "Iris-virginica", 0.2, True)
 
 # initial parameters
 learning_rate = 0.01
