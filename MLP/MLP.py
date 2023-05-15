@@ -1,14 +1,11 @@
 # MLP algorithm
-from random import seed
-from random import randrange
-from csv import reader
-import random
-import matplotlib.pyplot as plt
-import copy
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import confusion_matrix
 from sklearn.neural_network import MLPClassifier
 from sklearn.datasets import load_iris
+from matplotlib.colors import ListedColormap
+import matplotlib.pyplot as plt
+import matplotlib as mpl
 import numpy as np
 
 
@@ -31,29 +28,44 @@ x0, x1 = np.meshgrid(
         np.linspace(axes[2], axes[3], 200).reshape(-1, 1),
     )
 
+results = list()
+
 # Now, show the change after fitting epoch by epoch
-for epochs in range(0,10):
+for epochs in range(0,100):
     
     # Fit the model
     mlp.fit(X, y)
-    
-    # Plot the dataset
-    plt.figure(figsize=(10, 4))
-    plt.plot(X[y==1, 0], X[y==1, 1], "yo", label="Iris-Setosa")
-    plt.plot(X[y==0, 0], X[y==0, 1], "bs", label="Not Iris-Setosa")
-    
+
     # Use to model to sampling predictions over all feature space
     y_predict = mlp.predict(np.c_[x0.ravel(), x1.ravel()])
     zz = y_predict.reshape(x0.shape)
     
-    # get a nice color
-    from matplotlib.colors import ListedColormap
-    custom_cmap = ListedColormap(['#9898ff', '#fafab0'])
-    
-    # Use contour plot again
-    plt.contourf(x0, x1, zz, cmap=custom_cmap)
-    plt.xlabel("Petal length", fontsize=14)
-    plt.ylabel("Petal width", fontsize=14)
-    plt.legend(loc="upper left", fontsize=14)
-    plt.axis(axes)
-    plt.show()
+    results.append(zz)
+
+# prepare plot and colors
+fig, axs = plt.subplots(nrows = 3, ncols = 2, figsize = (10,8)) 
+fig.tight_layout(pad=2.5)
+viridis_big = mpl.colormaps['viridis']
+custom_cmap = ListedColormap(viridis_big(np.linspace(0.6, 0.75, 128)))
+
+iterator = 1
+for n in range(2):
+    for i in range(3):
+        # plot the dataset
+        axs[i, n].plot(X[y==1, 0], X[y==1, 1], "o", label="Iris-Setosa", c = "#598cbd")
+        axs[i, n].plot(X[y==0, 0], X[y==0, 1], "o", label="Not Iris-Setosa", c = "#3e6182")
+
+        # plot contour plot
+        color = axs[i, n].contourf(x0, x1, results[iterator], cmap=custom_cmap)
+        axs[i, n].set_title('Run for epoch nr: ' + str(iterator), fontweight ="bold", fontsize=10, loc='left')
+        axs[i, n].set_xlabel("Petal length", fontsize=10)
+        axs[i, n].set_ylabel("Petal width", fontsize=10)
+        axs[i, n].axis(axes)
+        iterator = iterator + (n+1) * (i+1)
+
+# legend and colorbar
+cbar = fig.colorbar(color, ax=axs.ravel().tolist(), ticks=[0, 1], aspect = 40)
+cbar.ax.set_yticklabels(['not-setosa', 'setosa'])
+axs[1,1].legend(loc='center right', bbox_to_anchor = (1.7, 0.5) , fancybox=True, shadow = True)
+
+plt.show()
