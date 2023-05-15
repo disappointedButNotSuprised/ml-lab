@@ -44,7 +44,8 @@ for epochs in range(0,100):
 
 # prepare plot and colors
 fig, axs = plt.subplots(nrows = 3, ncols = 2, figsize = (10,8)) 
-fig.tight_layout(pad=2.5)
+fig.tight_layout()
+fig.subplots_adjust(hspace=0.5)
 viridis_big = mpl.colormaps['viridis']
 custom_cmap = ListedColormap(viridis_big(np.linspace(0.6, 0.75, 128)))
 
@@ -64,8 +65,8 @@ for n in range(2):
         iterator = iterator + (n+1) * (i+1)
 
 # legend and colorbar
-cbar = fig.colorbar(color, ax=axs.ravel().tolist(), ticks=[0, 1], aspect = 40)
-cbar.ax.set_yticklabels(['not-setosa', 'setosa'])
-axs[1,1].legend(loc='center right', bbox_to_anchor = (1.7, 0.5) , fancybox=True, shadow = True)
+cbar = fig.colorbar(color, orientation = 'horizontal', ax=axs.ravel().tolist(), ticks=[0, 1], aspect = 50, shrink = 0.95)
+cbar.ax.set_xticklabels(['not-setosa', 'setosa'])
+axs[2,1].legend(loc='lower center', bbox_to_anchor = (-0.1, -0.7) , fancybox=True, shadow = True, ncols = 2)
 
 plt.show()
