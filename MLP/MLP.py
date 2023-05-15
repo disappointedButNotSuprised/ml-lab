@@ -11,33 +11,10 @@ from sklearn.neural_network import MLPClassifier
 from sklearn.datasets import load_iris
 import numpy as np
 
-# Load a CSV file
-def load_csv(filename):
-	dataset = list()
-	with open(filename, 'r') as file:
-		csv_reader = reader(file)
-		for row in csv_reader:
-			if not row:
-				continue
-			dataset.append(row)
-	return dataset
-
-# Convert string column to float
-def str_column_to_float(dataset, column):
-	for row in dataset:
-		row[column] = float(row[column].strip())
-
-
 
 ###########################
 # TESTING
 ###########################
-
-# load and prepare data
-filename = 'iris.csv'
-dataset = load_csv(filename)
-for i in range(len(dataset[0])-1):
-	str_column_to_float(dataset, i)
 
 iris = load_iris()
 X = iris.data[:, (2, 3)]
