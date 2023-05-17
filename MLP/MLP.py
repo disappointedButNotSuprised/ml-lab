@@ -7,25 +7,30 @@ from matplotlib.colors import ListedColormap
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 import numpy as np
+from sklearn import datasets
 
 
 ###########################
 # TESTING
 ###########################
 
-iris = load_iris()
-X = iris.data[:, (2, 3)]
-y = (iris.target == 0).astype(np.int_)
-
-mlp = MLPClassifier(max_iter=1, learning_rate_init=0.01, random_state=None, warm_start=True)
+#iris = load_iris()
+#X = iris.data[:, (2, 3)] 
+#X = iris.data[:, (0, 1, 2, 3)]
+#y = (iris.target == 0).astype(np.int_)
+X, y = datasets.load_iris(return_X_y=True)
+mlp = MLPClassifier(max_iter=1, learning_rate_init=0.01, warm_start=True)
+# warm_start - retain the solution of the previous call to fit as initialization
 
 # Pre-define the axes for plotting
 axes = [0, 7, 0, 3]
 
 # Pre-generate a grid of sampling points
-x0, x1 = np.meshgrid(
-        np.linspace(axes[0], axes[1], 200).reshape(-1, 1),
-        np.linspace(axes[2], axes[3], 200).reshape(-1, 1),
+x0, x1, x2, x3 = np.meshgrid(
+        np.linspace(axes[0], axes[1], 50).reshape(-1, 1),
+        np.linspace(axes[0], axes[1], 50).reshape(-1, 1),
+        np.linspace(axes[0], axes[1], 50).reshape(-1, 1),
+        np.linspace(axes[2], axes[3], 50).reshape(-1, 1),   
     )
 
 results = list()
@@ -37,10 +42,10 @@ for epochs in range(0,100):
     mlp.fit(X, y)
 
     # Use to model to sampling predictions over all feature space
-    y_predict = mlp.predict(np.c_[x0.ravel(), x1.ravel()])
-    zz = y_predict.reshape(x0.shape)
+    y_predict = mlp.predict(np.c_[x0.ravel(), x1.ravel(), x2.ravel(), x3.ravel()])
+    result = y_predict.reshape(x0.shape)
     
-    results.append(zz)
+    results.append(result)
 
 # prepare plot and colors
 fig, axs = plt.subplots(nrows = 3, ncols = 2, figsize = (10,8)) 
@@ -57,7 +62,7 @@ for n in range(2):
         axs[i, n].plot(X[y==0, 0], X[y==0, 1], "o", label="Not Iris-Setosa", c = "#3e6182")
 
         # plot contour plot
-        color = axs[i, n].contourf(x0, x1, results[iterator], cmap=custom_cmap)
+        color = axs[i, n].contourf(x0, x1, results[iterator][1], cmap=custom_cmap)
         axs[i, n].set_title('Run for epoch nr: ' + str(iterator), fontweight ="bold", fontsize=10, loc='left')
         axs[i, n].set_xlabel("Petal length", fontsize=10)
         axs[i, n].set_ylabel("Petal width", fontsize=10)
