@@ -146,6 +146,8 @@ def prepare_subdataset(source_dataset, class_name, p, reversed = False):
 # TESTING
 ###########################
 
+random.seed(69)
+
 # load and prepare data
 filename = 'iris.csv'
 dataset = load_csv(filename)
@@ -169,8 +171,41 @@ n_epoch = 10
 # prepare plot
 fig, (axs) = plt.subplots(nrows = 2, ncols = 3,figsize=(12,4))
 
-run_algorithm(dataset_setosa_training, dataset_setosa_validation, learning_rate, n_epoch, 0, "setosa")
-run_algorithm(dataset_versicolor_training, dataset_versicolor_validation, learning_rate, n_epoch, 1, "virginica")
-run_algorithm(dataset_virginica_training, dataset_virginica_validation, learning_rate, n_epoch, 2, "versicolor")
+# train wights for each class
+weights_setosa = train_weights(dataset_setosa_training,learning_rate,n_epoch)
+weights_versicolor = train_weights(dataset_versicolor_training,learning_rate,n_epoch)
+weights_virginica = train_weights(dataset_virginica_training,learning_rate,n_epoch)
+
+# create a multi-class validation dataset
+validation_dataset_all = list()
+for row in range(round(len(dataset)*0.2)):
+	validation_dataset_all.append(dataset[row])
+
+# create lists of activation scores of each class
+activations_all = list()
+
+for row in validation_dataset_all:
+	activation_setosa = 0
+	activation_versicolor = 0
+	activation_virginica = 0
+	
+	for i in range(len(row)-1):
+		activation_setosa += weights_setosa[i + 1] * row[i]
+		activation_versicolor += weights_versicolor[i + 1] * row[i]
+		activation_virginica += weights_virginica[i + 1] * row[i]
+	
+	activations_all.append([('Iris-setosa', activation_setosa), ('Iris-versicolor', activation_versicolor), ('Iris-virginica', activation_virginica)])
+
+# class of sample is assigned by the highest activation value
+row_num = 0
+winner_value = 0
+predictions = list()
+for row in validation_dataset_all:
+	winner_value = max(activations_all[row_num][0][1],activations_all[row_num][1][1],activations_all[row_num][2][1])
+	for tuples_row in activations_all:
+		for tuples_col in tuples_row:
+			if tuples_col[1] == winner_value:
+				predictions.append(tuples_col[0])
+	row_num = row_num + 1
 
 plt.show()
