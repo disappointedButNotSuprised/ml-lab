@@ -206,8 +206,6 @@ def data_visualisation(training_data, validation_data, results):
 	axs[2, 1].set_xlabel('Sepal length')
 	axs[2, 1].set_ylabel('Sepal width')
 
-	# calculate accuracy rate 
-
 	TP = results.setosa_matrix.tp + results.versicolor_matrix.tp + results.virginica_matrix.tp
 	TN = results.setosa_matrix.tn + results.versicolor_matrix.tn + results.virginica_matrix.tn
 	FP = results.setosa_matrix.fp + results.versicolor_matrix.fp + results.virginica_matrix.fp
@@ -278,7 +276,6 @@ dataset_all_training = list()
 dataset_range = range(round(len(dataset)*0.8))
 for row in dataset_range:
 	dataset_all_training.append(dataset[row])
-
 
 # initial parameters
 learning_rate = 0.01
