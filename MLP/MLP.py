@@ -1,4 +1,4 @@
-# MLP algorithm
+# Multi Layer Perceptron algorithm
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import confusion_matrix, classification_report
 from sklearn.neural_network import MLPClassifier
