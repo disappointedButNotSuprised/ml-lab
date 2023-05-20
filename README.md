@@ -9,4 +9,4 @@ Repository of  various ML algorithm implementations
 
 famous iris dataset (https://archive-beta.ics.uci.edu/dataset/53/iris)
 
-banknote outh dataset (https://archive-beta.ics.uci.edu/dataset/267/banknote+authentication)
+banknote auth dataset (https://archive-beta.ics.uci.edu/dataset/267/banknote+authentication)
