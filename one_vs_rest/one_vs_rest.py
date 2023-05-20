@@ -254,7 +254,7 @@ def prepare_subdataset(source_dataset, class_name, p, reversed = False):
 random.seed(69)
 
 # load and prepare data
-filename = 'iris.csv'
+filename = './one_vs_rest/iris.csv'
 dataset = load_csv(filename)
 for i in range(len(dataset[0])-1):
 	str_column_to_float(dataset, i)

@@ -275,7 +275,7 @@ def data_visualisation(training_data, validation_data, results):
 # Testing
 #*******************************
 
-filename = 'iris.csv'
+filename = './KNN/iris.csv'
 dataset = load_csv(filename)
 
 # convert all values to folat

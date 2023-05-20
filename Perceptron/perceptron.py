@@ -136,7 +136,7 @@ def generate_confusion_matrix(test_dataset, learning_rate, n_epoch, predictions)
 ###########################
 
 # load and prepare data
-filename = 'data.csv'
+filename = './Perceptron/data.csv'
 dataset = load_csv(filename)
 for i in range(len(dataset[0])-1):
 	str_column_to_float(dataset, i)
