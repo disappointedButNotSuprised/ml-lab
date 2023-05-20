@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 import csv
 import random
 from statistics import mode
+from scipy.interpolate import make_interp_spline
 
 # Load a CSV file
 def load_csv(filename):
@@ -295,7 +296,8 @@ k_list = list()
 accuracy_list = list()
 
 # run severeal times to check performacne in realation to k value
-for k in range(1,len(training_dataset)):
+max_k = len(training_dataset)
+for k in range(1,max_k):
 	predictions = list()
 	num_neighbors = k
 
@@ -317,7 +319,9 @@ for k in range(1,len(training_dataset)):
 
 # results visulaisation
 fig, ax = plt.subplots()
-ax.plot(k_list, accuracy_list)
+N_space = np.linspace(0, max_k, 500)
+spline = make_interp_spline(k_list, accuracy_list)
+plt.plot(N_space, spline(N_space))
 ax.set_title('algorithm accuracy in relation to k value', fontweight ="bold")
 ax.set_xlabel('k value')
 ax.set_ylabel('accuracy')
