@@ -1,9 +1,10 @@
 # Random Forest Classifier algorithm
 from sklearn.model_selection import train_test_split
-from sklearn.metrics import confusion_matrix, classification_report
+from sklearn.metrics import confusion_matrix, classification_report, precision_recall_fscore_support
 from sklearn.ensemble import RandomForestClassifier
 from sklearn import datasets
 from sklearn.datasets import load_iris
+from scipy.interpolate import make_interp_spline
 import matplotlib.pyplot as plt
 import seaborn as sns
 import numpy as np
@@ -37,5 +38,28 @@ ax.yaxis.set_ticklabels(['Setosa', 'Virginica', 'Versicolor'])
 plt.figure()
 ax = sns.heatmap(pd.DataFrame(clf_report).iloc[:-1, :].T, annot=True, )
 ax.set_title("Classification report for RFC algorithm", pad=20, fontweight ="bold")
+
+# hyperparameter controll test
+metrics = list()
+n_space = np.arange(1, 20, 1)
+for max_depth in n_space:
+    dfc_h = rfc = RandomForestClassifier(n_estimators=100, max_depth=max_depth)
+    y_predict_h = dfc_h.fit(X_train, y_train).predict(X_test)
+    conf_matrix = confusion_matrix(y_test, y_predict_h)
+    clf_report = classification_report(y_test, y_predict_h, target_names = iris.target_names, output_dict=True)
+    prfs_report = precision_recall_fscore_support(y_test, y_predict_h, average='micro')
+    metrics.append([prfs_report[0], prfs_report[1], prfs_report[2]])
+
+# print matrics in relation to hyperparameter
+metrics = np.array(metrics).T.tolist() 
+N_space = np.linspace(n_space.min(), n_space.max(), 500)
+plt.figure()
+for i in range(len(metrics)):
+    spline = make_interp_spline(n_space, metrics[i])
+    plt.plot(N_space, spline(N_space), c = 'tab:blue')
+plt.title('metrics vs max_depth', fontweight ="bold")
+plt.xlabel('max_depth', fontsize=10)
+plt.ylabel('ACC, TPR, F-score', fontsize=10)
+plt.show()
 
 plt.show()
