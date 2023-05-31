@@ -1,4 +1,6 @@
 # one vs all algorithm 
+from sklearn.metrics import confusion_matrix, classification_report
+import seaborn as sns
 from random import seed
 from random import randrange
 from csv import reader
@@ -230,6 +232,18 @@ def data_visualisation(training_data, validation_data, results):
 	plt.gcf().text(0.3, 0.05, 'f-score: ' + metrics[4],  fontsize=12)
 	plt.gcf().text(0.3, 0.01, 'Precision: ' + metrics[1], fontsize=12)
 
+
+def alt_results_report(y_test, y_predict):
+	conf_matrix = confusion_matrix(y_test, y_predict)
+	plt.figure()
+	ax = sns.heatmap(conf_matrix, annot=True, fmt='d')
+	ax.set_title("Agregated confusion matrix for one_vs_rest algorithm", pad=20, fontweight ="bold")
+	ax.set_xlabel("Predicted Diagnosis", fontsize=12, labelpad=10)
+	ax.xaxis.set_ticklabels(['Setosa', 'Virginica', 'Versicolor'])
+	ax.set_ylabel("Actual Diagnosis", fontsize=12, labelpad=10)
+	ax.yaxis.set_ticklabels(['Setosa', 'Virginica', 'Versicolor'])
+
+
 # preparing training and validation datasets in a one-vs-rest fashion
 def prepare_subdataset(source_dataset, class_name, p, reversed = False):
 	target_dataset = copy.deepcopy(source_dataset)
@@ -316,5 +330,6 @@ for row in dataset_all_validation:
 # calculate metrics and print report
 results_matrix = generate_success_matrix(predictions, dataset_all_validation)
 data_visualisation(dataset_all_training, dataset_all_validation, results_matrix)
+alt_results_report([row[-1] for row in dataset_all_validation], predictions)
 
 plt.show()
